@@ -1,6 +1,6 @@
 {
   "name": "express-sentry-tracing",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Express + Sentry(report / tracing)",
   "main": "index.js",
   "author": "michael34435@capslock.tw",
