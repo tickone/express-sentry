@@ -1,6 +1,10 @@
 dependencies:
+  '@sentry/core': 6.5.1
   '@sentry/node': 6.5.1
   '@sentry/tracing': 6.5.1
+  '@sentry/utils': 6.5.1
+  pluralize: 8.0.0
+  tslib: 2.2.0
 devDependencies:
   eslint: 7.28.0
   eslint-config-airbnb: 18.2.1_865bf980219d6c4beaad3708398fa6e4
@@ -1162,6 +1166,12 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-yBmscoBZpGHKscOImivjxJoATX8=
+  /pluralize/8.0.0:
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==
   /prelude-ls/1.2.1:
     dev: true
     engines:
@@ -1385,6 +1395,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+  /tslib/2.2.0:
+    dev: false
+    resolution:
+      integrity: sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
   /type-check/0.4.0:
     dependencies:
       prelude-ls: 1.2.1
@@ -1459,9 +1473,13 @@ packages:
     resolution:
       integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 specifiers:
+  '@sentry/core': ^6.5.1
   '@sentry/node': ^6.5.1
   '@sentry/tracing': ^6.5.1
+  '@sentry/utils': ^6.5.1
   eslint: ^7.28.0
   eslint-config-airbnb: ^18.2.1
   eslint-import-resolver-node: ^0.3.4
   eslint-plugin-import: ^2.23.4
+  pluralize: ^8.0.0
+  tslib: ^2.2.0
