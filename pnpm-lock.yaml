@@ -3,6 +3,7 @@ dependencies:
   '@sentry/node': 6.5.1
   '@sentry/tracing': 6.5.1
   '@sentry/utils': 6.5.1
+  cookie: 0.4.1
   pluralize: 8.0.0
   tslib: 2.2.0
 devDependencies:
@@ -1477,6 +1478,7 @@ specifiers:
   '@sentry/node': ^6.5.1
   '@sentry/tracing': ^6.5.1
   '@sentry/utils': ^6.5.1
+  cookie: ^0.4.1
   eslint: ^7.28.0
   eslint-config-airbnb: ^18.2.1
   eslint-import-resolver-node: ^0.3.4

@@ -1,21 +1,93 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-cond-assign */
-/* eslint-disable no-void */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable no-undef */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-cond-assign */
 /* eslint-disable max-len */
+/* eslint-disable no-param-reassign */
 const Sentry = require('@sentry/node');
 const Tracing = require('@sentry/tracing');
 const Utils = require('@sentry/utils');
 const Core = require('@sentry/core');
 const tslib = require('tslib');
+const cookie = require('cookie');
 const pluralize = require('pluralize');
+const url = require('url');
+
+function extractRequestData(req, keys) {
+  const DEFAULT_REQUEST_KEYS = ['cookies', 'data', 'headers', 'method', 'query_string', 'url'];
+
+  if (keys === undefined) { keys = DEFAULT_REQUEST_KEYS; }
+  const requestData = {};
+  // headers:
+  //   node, express: req.headers
+  //   koa: req.header
+  const headers = (req.headers || req.header || {});
+  // method:
+  //   node, express, koa: req.method
+  const { method } = req;
+  // host:
+  //   express: req.hostname in > 4 and req.host in < 4
+  //   koa: req.host
+  //   node: req.headers.host
+  const host = req.hostname || req.host || headers.host || '<no host>';
+  // protocol:
+  //   node: <n/a>
+  //   express, koa: req.protocol
+  const protocol = req.protocol === 'https' || req.secure || (req.socket || {}).encrypted
+    ? 'https'
+    : 'http';
+  // url (including path and query string):
+  //   node, express: req.originalUrl
+  //   koa: req.url
+  const originalUrl = (req.originalUrl || req.url || '');
+  // absolute url
+  const absoluteUrl = `${protocol}://${host}${originalUrl}`;
+  keys.forEach((key) => {
+    switch (key) {
+      case 'headers':
+        requestData.headers = headers;
+        break;
+      case 'method':
+        requestData.method = method;
+        break;
+      case 'url':
+        requestData.url = absoluteUrl;
+        break;
+      case 'cookies':
+        // cookies:
+        //   node, express, koa: req.headers.cookie
+        //   vercel, sails.js, express (w/ cookie middleware): req.cookies
+        requestData.cookies = req.cookies || cookie.parse(headers.cookie || '');
+        break;
+      case 'query_string':
+        // query string:
+        //   node: req.url (raw)
+        //   express, koa: req.query
+        requestData.query_string = url.parse(originalUrl || '', false).query;
+        break;
+      case 'data':
+        if (method === 'GET' || method === 'HEAD') {
+          break;
+        }
+        // body data: express, koa: req.body
+        // when using node by itself, you have to read the incoming stream(see
+        // https://nodejs.dev/learn/get-http-request-body-data-using-nodejs); if a user is doing that, we can't know
+        if (req.body !== undefined) {
+          requestData.data = Utils.isString(req.body) ? req.body : JSON.stringify(Utils.normalize(req.body));
+        }
+        break;
+      default:
+        if ({}.hasOwnProperty.call(req, key)) {
+          requestData[key] = req[key];
+        }
+    }
+  });
+  return requestData;
+}
 
 function extractExpressTransactionName(req, options) {
-  if (options === void 0) { options = {}; }
+  if (options === undefined) { options = {}; }
   let _a;
-  const method = (_a = req.method) === null || _a === void 0 ? void 0 : _a.toUpperCase();
+  const method = (_a = req.method) === null || _a === undefined ? undefined : _a.toUpperCase();
   let path = '';
   if (req.route) {
     path = `${req.baseUrl || ''}${req.route.path}`;
@@ -56,6 +128,14 @@ module.exports = (app, dsn) => {
 
     environment: process.env.NODE_ENV,
   });
+
+  function addExpressReqToTransaction(transaction, req) {
+    if (!transaction) { return; }
+    transaction.name = extractExpressTransactionName(req, { path: true, method: true });
+    transaction.setData('url', req.originalUrl);
+    transaction.setData('baseUrl', req.baseUrl);
+    transaction.setData('query', req.query);
+  }
 
   // RequestHandler creates a separate execution context using domains, so that every
   // transaction/span/breadcrumb is attached to its own Hub instance
